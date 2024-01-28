@@ -1,6 +1,7 @@
 package files
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
@@ -51,7 +52,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	err = h.processor.UploadFile(fileBytes, file.Filename)
+	id, err := h.processor.UploadFile(fileBytes, file.Filename)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -61,6 +62,7 @@ func (h *Handler) UploadFile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
+		"id":      id,
 		"message": "File uploaded successfully",
 	})
 }
@@ -71,6 +73,12 @@ func (h *Handler) DownloadFile(c *gin.Context) {
 	file, name, err := h.processor.GetFileContentAndName(id)
 	if err != nil {
 		log.Println(err)
+		if errors.As(err, &FileNotFoundErr) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "File not found",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to download file",
 		})
@@ -91,6 +99,11 @@ func (h *Handler) ListFiles(c *gin.Context) {
 		return
 	}
 
+	if len(files) == 0 {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
 	c.JSON(http.StatusOK, files)
 }
 
@@ -100,6 +113,12 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 	err := h.processor.DeleteFile(id)
 	if err != nil {
 		log.Println(err)
+		if errors.As(err, &FileNotFoundErr) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "File not found",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to delete file",
 		})

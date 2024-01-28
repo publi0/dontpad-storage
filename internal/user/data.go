@@ -9,7 +9,7 @@ type DataAPI interface {
 	SaveFile(file FileData) error
 	GetFiles() ([]FileData, error)
 	GetFile(id string) (FileData, error)
-	DeleteFile(id string) error
+	DeleteFile(id string) (int64, error)
 }
 
 type Data struct {
@@ -59,10 +59,14 @@ func (d *Data) GetFile(id string) (FileData, error) {
 	return file, nil
 }
 
-func (d *Data) DeleteFile(id string) error {
-	_, err := d.db.Exec("DELETE FROM files WHERE id = ?", id)
+func (d *Data) DeleteFile(id string) (int64, error) {
+	r, err := d.db.Exec("DELETE FROM files WHERE id = ?", id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	affected, err := r.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return affected, nil
 }

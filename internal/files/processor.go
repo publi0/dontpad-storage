@@ -8,14 +8,16 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/aidarkhanov/nanoid"
 	"log"
 	"os"
 	"time"
 )
 
+var FileNotFoundErr = errors.New("file not found")
+
 type ProcessorAPI interface {
-	UploadFile(file []byte, fileName string) error
+	UploadFile(file []byte, fileName string) (string, error)
 	GetFileContentAndName(id string) ([]byte, string, error)
 	ListFiles() ([]user.FileData, error)
 	DeleteFile(id string) error
@@ -35,22 +37,26 @@ func NewProcessor(encrypter EncrypterAPI, dontpad dontpad.ClientAPI, user user.D
 	}
 }
 
-func (p *Processor) UploadFile(file []byte, fileName string) error {
-	id := uuid.New().String()
+func (p *Processor) UploadFile(file []byte, fileName string) (string, error) {
+	id := nanoid.New()
 
 	encrypt, err := p.encrypter.encrypt(file, getEncryptKey())
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	base64 := base64.StdEncoding.EncodeToString(encrypt)
+	base64file := base64.StdEncoding.EncodeToString(encrypt)
 
-	hash := md5.Sum([]byte(base64))
+	hash := md5.Sum([]byte(base64file))
 	hashString := hex.EncodeToString(hash[:])
 
-	err = p.dontpad.UploadFile(base64, id)
+	_, err = p.dontpad.DownloadFile(id)
 	if err != nil {
-		return err
+		return "", err
+	}
+	err = p.dontpad.UploadFile(base64file, id)
+	if err != nil {
+		return "", err
 	}
 
 	err = p.user.SaveFile(user.FileData{
@@ -60,16 +66,19 @@ func (p *Processor) UploadFile(file []byte, fileName string) error {
 		CreatedAt: time.Now().String(),
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (p *Processor) GetFileContentAndName(id string) ([]byte, string, error) {
 	getFile, err := p.user.GetFile(id)
 	if err != nil {
 		return nil, "", err
+	}
+	if getFile.ID == "" {
+		return nil, "", FileNotFoundErr
 	}
 
 	log.Println("File name: "+getFile.Name, " File MD5: "+getFile.MD5)
@@ -103,12 +112,15 @@ func (p *Processor) ListFiles() ([]user.FileData, error) {
 }
 
 func (p *Processor) DeleteFile(id string) error {
-	err := p.dontpad.UploadFile("deleted", id)
+	rows, err := p.user.DeleteFile(id)
 	if err != nil {
 		return err
 	}
+	if rows == 0 {
+		return FileNotFoundErr
+	}
 
-	err = p.user.DeleteFile(id)
+	err = p.dontpad.UploadFile("deleted", id)
 	if err != nil {
 		return err
 	}
@@ -121,7 +133,7 @@ func getEncryptKey() string {
 	if err != nil {
 		log.Println("Error reading key from file")
 		log.Println("Generating new key")
-		s := uuid.New().String()
+		s, _ := nanoid.Generate(nanoid.DefaultAlphabet, 32)
 		err := os.WriteFile("resources/key.txt", []byte(s), 0644)
 		if err != nil {
 			log.Println("Error writing key to file")
