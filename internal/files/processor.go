@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-var FileNotFoundErr = errors.New("file not found")
-
 type ProcessorAPI interface {
 	UploadFile(file []byte, fileName string) (string, error)
 	GetFileContentAndName(id string) ([]byte, string, error)
@@ -78,7 +76,7 @@ func (p *Processor) GetFileContentAndName(id string) ([]byte, string, error) {
 		return nil, "", err
 	}
 	if getFile.ID == "" {
-		return nil, "", FileNotFoundErr
+		return nil, "", &FileNotFoundErr{id}
 	}
 
 	log.Println("File name: "+getFile.Name, " File MD5: "+getFile.MD5)
@@ -117,7 +115,7 @@ func (p *Processor) DeleteFile(id string) error {
 		return err
 	}
 	if rows == 0 {
-		return FileNotFoundErr
+		return &FileNotFoundErr{id}
 	}
 
 	err = p.dontpad.UploadFile("deleted", id)

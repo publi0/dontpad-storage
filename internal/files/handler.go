@@ -73,7 +73,8 @@ func (h *Handler) DownloadFile(c *gin.Context) {
 	file, name, err := h.processor.GetFileContentAndName(id)
 	if err != nil {
 		log.Println(err)
-		if errors.As(err, &FileNotFoundErr) {
+		var fileNotFoundErr *FileNotFoundErr
+		if errors.As(err, &fileNotFoundErr) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"message": "File not found",
 			})
@@ -113,7 +114,8 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 	err := h.processor.DeleteFile(id)
 	if err != nil {
 		log.Println(err)
-		if errors.As(err, &FileNotFoundErr) {
+		var fileNotFoundErr *FileNotFoundErr
+		if errors.As(err, &fileNotFoundErr) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"message": "File not found",
 			})
