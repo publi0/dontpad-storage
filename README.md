@@ -3,6 +3,8 @@
 Recently I was watching a video about a guy who start uploading files to youtube, so I thought it would be cool to have a script to upload files to dontpad.
 Why not?
 
+[![Go](https://github.com/publi0/dontpad-storage/actions/workflows/go.yml/badge.svg)](https://github.com/publi0/dontpad-storage/actions/workflows/go.yml)
+
 ## table of contents
 
 - [Description](#description)
