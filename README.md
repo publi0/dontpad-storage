@@ -19,7 +19,8 @@ All files will be encrypted and checksumed before being uploaded and download.
 
 ## Architecture / Pipeline
 
-![](/Users/publio/GolandProjects/dontpad-storage/map.svg)
+![image](https://github.com/publi0/dontpad-storage/assets/14155185/f1839154-9623-4196-a3b9-9cab3b870873)
+
 
 ## Getting Started
 
