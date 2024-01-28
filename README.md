@@ -33,7 +33,7 @@ go run cmd/main.go
 Then you can upload a file using curl:
 
 ```bash
-curl -X PUT -F "file=@/Users/publio/Downloads/IMG_20190818_123456.jpg" http://localhost:8080/upload
+curl -X PUT -F "file=@/Users/publio/Downloads/IMG_20190818_123456.jpg" http://localhost:8080/files
 ```
 
 ## Endpoints:
