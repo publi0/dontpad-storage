@@ -54,6 +54,8 @@ curl -X PUT -F "file=@/Users/publio/Downloads/IMG_20190818_123456.jpg" http://lo
   - Response: json
   - Params: file id
 
+> Obs: Inside the `/requests` folder you can find a insomnia collection with all requests.
+
 ## Tech stack
 
 - Go
