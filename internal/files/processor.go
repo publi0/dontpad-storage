@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"github.com/aidarkhanov/nanoid"
 	"log"
 	"os"
@@ -93,7 +92,6 @@ func (p *Processor) GetFileContentAndName(id string) ([]byte, string, error) {
 
 	decodedBytes, err := base64.StdEncoding.DecodeString(file)
 	if err != nil {
-		fmt.Println("Error decoding base64:", err)
 		return nil, "", err
 	}
 

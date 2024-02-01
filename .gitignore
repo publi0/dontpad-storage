@@ -9,6 +9,7 @@
 *.so
 *.dylib
  .idea/
+ .vscode/
 
 # Test binary, built with `go test -c`
 *.test
@@ -23,3 +24,4 @@
 go.work
 
 /.idea/
+/.vscode/
