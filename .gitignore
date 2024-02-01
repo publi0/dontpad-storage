@@ -25,3 +25,5 @@ go.work
 
 /.idea/
 /.vscode/
+main
+/out/
