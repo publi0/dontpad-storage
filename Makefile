@@ -9,10 +9,4 @@ clean:
 
 # Test target
 test:
-	$(GOTEST) -v ./...
-
-# Get dependencies target
-get:
-	$(GOGET) -v ./...
-
-.PHONY: build clean test get
+	go test -v ./...
